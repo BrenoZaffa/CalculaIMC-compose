@@ -4,12 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,7 +24,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.calculaimc_compose.ui.theme.CalculaIMCcomposeTheme
@@ -61,42 +67,46 @@ fun CalculaIMCScreen(name: String, modifier: Modifier = Modifier) {
         }
     }
 
-    Column {
-        Text(
-            text = "Peso:",
-            modifier = Modifier.padding(top = 48.dp, start = 16.dp, end = 16.dp)
-        )
+    Column (
+        modifier = modifier.padding(horizontal = 16.dp),
+    ) {
         OutlinedTextField(
             value = peso,
-            onValueChange = { peso = it },
+            onValueChange = { newValue ->
+                if (newValue.all { it.isDigit() || it == '.' }) {
+                    peso = newValue
+                }
+            },
             label = { Text("Peso em Kg") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp)
                 .fillMaxWidth(),
         )
-        Text(
-            text = "Altura:",
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+
         OutlinedTextField(
             value = altura,
-            onValueChange = { altura = it },
-            label = { Text("Altura em cm") },
+            onValueChange = { newValue ->
+                if (newValue.all { it.isDigit() || it == '.' }) {
+                    altura = newValue
+                }
+            },
+            label = { Text("Altura em metros") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp)
                 .fillMaxWidth()
         )
-        Text(
-            text = "IMC: $resultado",
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        Row {
+        if(resultado.toDouble() > 0){
+            PanelResultado(resultado = resultado)
+        }
+        Row (
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             Button(
                 onClick = { calcularIMC() },
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
                     .weight(1f)
             ) {
                 Text("Calcular")
@@ -104,12 +114,40 @@ fun CalculaIMCScreen(name: String, modifier: Modifier = Modifier) {
             Button(
                 onClick = { peso = ""; altura = ""; resultado = "0.0" },
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .weight(1f)
+                    .weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
             ) {
                 Text("Limpar")
             }
         }
+    }
+}
+
+@Composable
+fun PanelResultado(resultado: String, modifier: Modifier = Modifier) {
+    Column (
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Resultado:",
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+        Text(
+            text = resultado,
+            modifier = Modifier.padding(bottom = 16.dp),
+            style = MaterialTheme.typography.headlineLarge
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PanelResultadoPreview() {
+    CalculaIMCcomposeTheme {
+        PanelResultado(resultado = "22.22")
     }
 }
 

@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +36,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.calculaimc_compose.model.ImcViewModel
 import com.example.calculaimc_compose.ui.theme.CalculaIMCcomposeTheme
 
@@ -41,11 +48,40 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CalculaIMCcomposeTheme {
+                val navController = rememberNavController()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    CalculaIMCScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    NavHost(navController = navController, startDestination = "home") {
+                        composable(
+                            "home",
+                            exitTransition = {
+                                slideOutHorizontally(targetOffsetX = { -it }) + fadeOut()
+                            },
+                            popEnterTransition = {
+                                slideInHorizontally(initialOffsetX = { -it }) + fadeIn()
+                            }
+                        ) {
+                            CalculaIMCScreen(
+                                modifier = Modifier.padding(innerPadding),
+                                onNavigateToDeveloper = {
+                                    navController.navigate("developer")
+                                }
+                            )
+                        }
+                        composable(
+                            "developer",
+                            enterTransition = {
+                                slideInHorizontally(initialOffsetX = { it }) + fadeIn()
+                            },
+                            popExitTransition = {
+                                slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+                            }
+                        ) {
+                            DeveloperScreen(
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -55,7 +91,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CalculaIMCScreen(
     modifier: Modifier = Modifier,
-    viewModel: ImcViewModel = viewModel()
+    viewModel: ImcViewModel = viewModel(),
+    onNavigateToDeveloper: () -> Unit
 ) {
     var focusRequester by remember { mutableStateOf(FocusRequester()) }
 
@@ -94,7 +131,7 @@ fun CalculaIMCScreen(
         )
         Button(
             onClick = {
-
+                onNavigateToDeveloper()
             },
             modifier = Modifier
                 .padding(top = 8.dp)
@@ -156,7 +193,7 @@ fun PanelButtons(
 @Composable
 fun DeveloperScreen(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(8.dp),
+        modifier = modifier.fillMaxSize().padding(8.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -196,6 +233,8 @@ fun PanelResultadoPreview() {
 @Composable
 fun CalculaIMCScreenPreview() {
     CalculaIMCcomposeTheme {
-        CalculaIMCScreen()
+        CalculaIMCScreen(
+            onNavigateToDeveloper = {}
+        )
     }
 }

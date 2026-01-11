@@ -39,7 +39,6 @@ class MainActivity : ComponentActivity() {
             CalculaIMCcomposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     CalculaIMCScreen(
-                        name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -49,13 +48,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun CalculaIMCScreen(name: String, modifier: Modifier = Modifier) {
+fun CalculaIMCScreen(modifier: Modifier = Modifier) {
     var peso by rememberSaveable() { mutableStateOf("") }
     var altura by rememberSaveable { mutableStateOf("") }
     var resultado by rememberSaveable { mutableStateOf("0.0") }
 
 
-    fun calcularIMC() {
+    val calcularIMC = {
         val alturaValor = altura.toDoubleOrNull()
         val pesoValor = peso.toDoubleOrNull()
 
@@ -65,6 +64,12 @@ fun CalculaIMCScreen(name: String, modifier: Modifier = Modifier) {
         } else {
             resultado = "0.0"
         }
+    }
+
+    val limpar = {
+        peso = ""
+        altura = ""
+        resultado = "0.0"
     }
 
     Column (
@@ -100,28 +105,10 @@ fun CalculaIMCScreen(name: String, modifier: Modifier = Modifier) {
         if(resultado.toDouble() > 0){
             PanelResultado(resultado = resultado)
         }
-        Row (
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Button(
-                onClick = { calcularIMC() },
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Text("Calcular")
-            }
-            Button(
-                onClick = { peso = ""; altura = ""; resultado = "0.0" },
-                modifier = Modifier
-                    .weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Limpar")
-            }
-        }
+        PanelButtons(
+            onCalcularClick = calcularIMC,
+            onLimparClick = limpar
+        )
     }
 }
 
@@ -143,6 +130,44 @@ fun PanelResultado(resultado: String, modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun PanelButtons(
+    onCalcularClick: () -> Unit,
+    onLimparClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row (
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Button(
+            onClick = { onCalcularClick() },
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            Text("Calcular")
+        }
+        Button(
+            onClick = { onLimparClick() },
+            modifier = Modifier
+                .weight(1f),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            Text("Limpar")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PanelButtonsPreview() {
+    CalculaIMCcomposeTheme {
+        PanelButtons(onCalcularClick = {}, onLimparClick = {})
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun PanelResultadoPreview() {
@@ -155,6 +180,6 @@ fun PanelResultadoPreview() {
 @Composable
 fun CalculaIMCScreenPreview() {
     CalculaIMCcomposeTheme {
-        CalculaIMCScreen("Android")
+        CalculaIMCScreen()
     }
 }

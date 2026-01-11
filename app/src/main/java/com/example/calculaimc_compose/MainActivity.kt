@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CalculaIMCcomposeTheme {
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     CalculaIMCScreen(
                         modifier = Modifier.padding(innerPadding)
@@ -91,6 +92,16 @@ fun CalculaIMCScreen(
                 focusRequester.requestFocus()
             }
         )
+        Button(
+            onClick = {
+
+            },
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth()
+        ) {
+            Text("Sobre o Desenvolvedor")
+        }
     }
 }
 
@@ -139,6 +150,29 @@ fun PanelButtons(
         ) {
             Text("Limpar")
         }
+    }
+}
+
+@Composable
+fun DeveloperScreen(modifier: Modifier = Modifier) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(8.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Desenvolvido por:")
+        Text(
+            text = "brenozaffa01@gmail.com",
+            style = MaterialTheme.typography.headlineMedium
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DeveloperScreenPreview(modifier: Modifier = Modifier) {
+    CalculaIMCcomposeTheme {
+        DeveloperScreen()
     }
 }
 

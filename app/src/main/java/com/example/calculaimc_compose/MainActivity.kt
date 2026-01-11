@@ -31,6 +31,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.calculaimc_compose.model.ImcViewModel
 import com.example.calculaimc_compose.ui.theme.CalculaIMCcomposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -50,41 +52,18 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun CalculaIMCScreen(modifier: Modifier = Modifier) {
-    var peso by rememberSaveable() { mutableStateOf("") }
-    var altura by rememberSaveable { mutableStateOf("") }
-    var resultado by rememberSaveable { mutableStateOf("0.0") }
+fun CalculaIMCScreen(
+    modifier: Modifier = Modifier,
+    viewModel: ImcViewModel = viewModel()
+) {
     var focusRequester by remember { mutableStateOf(FocusRequester()) }
-
-    val calcularIMC = {
-        val alturaValor = altura.toDoubleOrNull()
-        val pesoValor = peso.toDoubleOrNull()
-
-        if (alturaValor != null && pesoValor != null) {
-            val imc = pesoValor / (alturaValor * alturaValor)
-            resultado = "%.2f".format(imc)
-        } else {
-            resultado = "0.0"
-        }
-    }
-
-    val limpar: () -> Unit = {
-        peso = ""
-        altura = ""
-        resultado = "0.0"
-        focusRequester.requestFocus()
-    }
 
     Column (
         modifier = modifier.padding(horizontal = 16.dp),
     ) {
         OutlinedTextField(
-            value = peso,
-            onValueChange = { newValue ->
-                if (newValue.all { it.isDigit() || it == '.' }) {
-                    peso = newValue
-                }
-            },
+            value = viewModel.peso,
+            onValueChange = { viewModel.onPesoChange(it) },
             label = { Text("Peso em Kg") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier
@@ -94,24 +73,23 @@ fun CalculaIMCScreen(modifier: Modifier = Modifier) {
         )
 
         OutlinedTextField(
-            value = altura,
-            onValueChange = { newValue ->
-                if (newValue.all { it.isDigit() || it == '.' }) {
-                    altura = newValue
-                }
-            },
+            value = viewModel.altura,
+            onValueChange = { viewModel.onAlturaChange(it) },
             label = { Text("Altura em metros") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier
                 .padding(bottom = 16.dp)
                 .fillMaxWidth()
         )
-        if(resultado.toDouble() > 0){
-            PanelResultado(resultado = resultado)
+        if(viewModel.resultado.toDouble() > 0){
+            PanelResultado(resultado = viewModel.resultado)
         }
         PanelButtons(
-            onCalcularClick = calcularIMC,
-            onLimparClick = limpar
+            onCalcularClick = { viewModel.calcularIMC() },
+            onLimparClick = {
+                viewModel.limpar()
+                focusRequester.requestFocus()
+            }
         )
     }
 }
